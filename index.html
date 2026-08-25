@@ -4,115 +4,201 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mes applications</title>
+    <title>Applications Interbois</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Geologica:wght@300;400;500;600;700;800&family=Lora:ital,wght@0,400;1,400&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <style>
+        :root {
+            --noir: #000000;
+            --blanc: #ffffff;
+            --gris-pale: #E8E8E8;
+            --gris-moyen: #CFCDCB;
+            --gris-fonce: #5B5B59;
+            --accent: #FE5000;
+            --bw-hair: 1px;
+            --bw-rule: 2px;
+            --bw-heavy: 4px;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
         }
 
         body {
-            font-family: system-ui, sans-serif;
-            background: #0f172a;
-            color: #e2e8f0;
+            font-family: "Geologica", system-ui, sans-serif;
+            background: var(--blanc);
+            color: var(--noir);
             min-height: 100vh;
-            padding: 2rem 1rem;
+            padding: 64px 24px 96px;
+        }
+
+        a {
+            color: var(--noir);
+        }
+
+        a:hover {
+            color: var(--accent);
         }
 
         header {
-            max-width: 900px;
-            margin: 0 auto 2rem;
-            text-align: center;
+            max-width: 960px;
+            margin: 0 auto 48px;
+        }
+
+        .eyebrow {
+            font-size: 12px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--gris-fonce);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .demi-rond {
+            width: 8px;
+            height: 4px;
+            background: var(--accent);
+            border-radius: 999px 999px 0 0;
         }
 
         h1 {
-            font-size: 2rem;
-            margin-bottom: 1.2rem;
+            font-family: "Geologica", sans-serif;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            font-size: clamp(2rem, 4vw, 2.75rem);
+            margin-bottom: 24px;
         }
 
         .header-actions {
             display: flex;
-            gap: .6rem;
-            justify-content: center;
+            gap: 12px;
             flex-wrap: wrap;
+            border-top: var(--bw-rule) solid var(--noir);
+            padding-top: 24px;
         }
 
         #search {
-            width: 100%;
-            max-width: 400px;
-            padding: .7rem 1rem;
-            border-radius: 10px;
-            border: 1px solid #334155;
-            background: #1e293b;
-            color: #e2e8f0;
+            flex: 1;
+            min-width: 220px;
+            max-width: 420px;
+            padding: 12px 16px;
+            border-radius: 0;
+            border: var(--bw-hair) solid var(--noir);
+            background: var(--blanc);
+            color: var(--noir);
+            font-family: "Geologica", sans-serif;
             font-size: 1rem;
         }
 
+        #search:focus {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
         button {
-            padding: .7rem 1.1rem;
-            border-radius: 10px;
-            border: none;
-            font-size: .95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 18px;
+            border-radius: 0;
+            border: var(--bw-hair) solid var(--noir);
+            font-family: "Geologica", sans-serif;
+            font-size: .9rem;
+            font-weight: 500;
             cursor: pointer;
-            background: #334155;
-            color: #e2e8f0;
+            background: var(--blanc);
+            color: var(--noir);
+            transition: background-color .16s ease, color .16s ease, transform .12s ease;
         }
 
         button:hover {
-            filter: brightness(1.2);
+            background: var(--noir);
+            color: var(--blanc);
+        }
+
+        button:active {
+            transform: scale(.98);
+        }
+
+        button svg {
+            width: 16px;
+            height: 16px;
         }
 
         button.primary {
-            background: #0ea5e9;
-            color: #fff;
+            background: var(--noir);
+            color: var(--blanc);
+        }
+
+        button.primary:hover {
+            background: #262626;
         }
 
         #adminForm {
-            max-width: 900px;
-            margin: 0 auto 1.5rem;
-            background: #1e293b;
-            border: 1px solid #0ea5e9;
-            border-radius: 14px;
-            padding: 1.2rem;
+            max-width: 960px;
+            margin: 0 auto 32px;
+            background: var(--blanc);
+            border: var(--bw-hair) solid var(--noir);
+            border-radius: 0;
+            padding: 32px;
         }
 
         #adminForm h2 {
-            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
             font-size: 1.1rem;
+            font-weight: 600;
         }
 
         #adminForm form {
             display: grid;
-            gap: .6rem;
+            gap: 12px;
         }
 
         #adminForm input[type="text"],
         #adminForm input[type="url"] {
-            padding: .7rem;
-            border-radius: 8px;
-            border: 1px solid #334155;
-            background: #0f172a;
-            color: #e2e8f0;
+            padding: 12px;
+            border-radius: 0;
+            border: var(--bw-hair) solid var(--noir);
+            background: var(--blanc);
+            color: var(--noir);
+            font-family: "Geologica", sans-serif;
             font-size: 1rem;
         }
 
+        #adminForm input[type="text"]:focus,
+        #adminForm input[type="url"]:focus {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
         #adminForm input[type="file"] {
-            color: #94a3b8;
+            color: var(--gris-fonce);
             font-size: .9rem;
         }
 
         .form-actions {
             display: flex;
-            gap: .6rem;
+            gap: 12px;
         }
 
         #cancelBtn {
-            background: #ef4444;
+            border-color: var(--gris-moyen);
+            color: var(--gris-fonce);
         }
 
         #imgPreview {
             display: flex;
-            gap: .8rem;
+            gap: 16px;
             align-items: center;
             flex-wrap: wrap;
         }
@@ -121,19 +207,15 @@
             width: 345px;
             height: 230px;
             object-fit: cover;
-            border-radius: 8px;
-            border: 1px solid #334155;
-        }
-
-        #removeImgBtn {
-            background: #ef4444;
+            border-radius: 0;
+            border: var(--bw-hair) solid var(--noir);
         }
 
         /* Fenêtre de connexion */
         #loginModal {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, .7);
+            background: rgba(0, 0, 0, .75);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -141,60 +223,70 @@
         }
 
         #loginModal .box {
-            background: #1e293b;
-            border: 1px solid #334155;
-            border-radius: 14px;
-            padding: 1.5rem;
-            width: min(90vw, 360px);
+            background: var(--blanc);
+            border: var(--bw-hair) solid var(--noir);
+            border-radius: 0;
+            padding: 32px;
+            width: min(90vw, 380px);
             display: grid;
-            gap: .8rem;
+            gap: 16px;
         }
 
         #loginModal h2 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
             font-size: 1.2rem;
+            font-weight: 600;
         }
 
         #loginModal form {
             display: grid;
-            gap: .8rem;
+            gap: 12px;
         }
 
         #loginModal input {
-            padding: .7rem;
-            border-radius: 8px;
-            border: 1px solid #334155;
-            background: #0f172a;
-            color: #e2e8f0;
+            padding: 12px;
+            border-radius: 0;
+            border: var(--bw-hair) solid var(--noir);
+            background: var(--blanc);
+            color: var(--noir);
+            font-family: "Geologica", sans-serif;
             font-size: 1rem;
         }
 
+        #loginModal input:focus {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
         #loginError {
-            color: #ef4444;
+            color: var(--accent);
             font-size: .85rem;
         }
 
         #grid {
             display: grid;
-            gap: 1rem;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            max-width: 900px;
+            gap: 24px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            max-width: 960px;
             margin: 0 auto;
         }
 
         .card {
-            background: #1e293b;
-            border: 1px solid #334155;
-            border-radius: 14px;
-            padding: 1.2rem;
+            background: var(--blanc);
+            border: var(--bw-hair) solid var(--noir);
+            border-radius: 0;
+            padding: 24px;
             display: flex;
             flex-direction: column;
-            gap: .5rem;
-            transition: transform .15s, border-color .15s;
+            gap: 8px;
+            transition: border-color .16s ease, transform .16s ease;
         }
 
         .card:hover {
-            transform: translateY(-3px);
-            border-color: #38bdf8;
+            transform: translateY(-2px);
+            border-color: var(--accent);
         }
 
         .card .screenshot {
@@ -202,69 +294,77 @@
             max-width: 345px;
             height: 230px;
             object-fit: cover;
-            border-radius: 8px;
-            background: #0f172a;
+            border-radius: 0;
+            background: var(--gris-pale);
+            margin-bottom: 4px;
         }
 
         .card .icon {
-            font-size: 2rem;
+            width: 28px;
+            height: 28px;
+            color: var(--gris-fonce);
         }
 
         .card h2 {
             font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
         }
 
         .card p {
-            color: #94a3b8;
+            font-family: "Lora", serif;
+            font-style: italic;
+            color: var(--gris-fonce);
             font-size: .9rem;
-            line-height: 1.4;
+            line-height: 1.5;
             flex: 1;
         }
 
         .card .open-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
             text-decoration: none;
-            color: #38bdf8;
+            color: var(--noir);
             font-size: .9rem;
             font-weight: 600;
         }
 
         .card .open-link:hover {
+            color: var(--accent);
             text-decoration: underline;
         }
 
         .card .admin-actions {
             display: flex;
-            gap: .5rem;
-            margin-top: .6rem;
-            padding-top: .6rem;
-            border-top: 1px solid #334155;
+            gap: 8px;
+            margin-top: 8px;
+            padding-top: 12px;
+            border-top: var(--bw-hair) solid var(--gris-moyen);
         }
 
         .card .admin-actions button {
-            padding: .4rem .8rem;
-            font-size: .85rem;
+            padding: 6px 12px;
+            font-size: .82rem;
         }
 
-        .card .admin-actions .edit {
-            background: #f59e0b;
-            color: #0f172a;
-        }
-
-        .card .admin-actions .delete {
-            background: #ef4444;
+        .card .admin-actions .delete:hover {
+            background: var(--accent);
+            color: var(--blanc);
+            border-color: var(--accent);
         }
 
         .empty {
-            color: #64748b;
+            color: var(--gris-fonce);
             text-align: center;
             grid-column: 1 / -1;
-            padding: 2rem;
+            padding: 48px 0;
         }
 
         .hint {
-            color: #64748b;
+            color: var(--gris-fonce);
             font-size: .85rem;
-            margin-top: .8rem;
+            margin-top: 8px;
         }
 
         .hidden {
@@ -275,17 +375,18 @@
 
 <body>
     <header>
+        <div class="eyebrow"><span class="demi-rond"></span>interbois</div>
         <h1>Applications Interbois</h1>
         <div class="header-actions">
             <input id="search" type="search" placeholder="Rechercher une application…">
-            <button id="adminBtn">🛠️ Mode admin</button>
+            <button id="adminBtn"><i data-lucide="settings"></i> Mode admin</button>
         </div>
     </header>
 
     <!-- Fenêtre de connexion -->
     <div id="loginModal" class="hidden">
         <div class="box">
-            <h2>🔒 Connexion admin</h2>
+            <h2><i data-lucide="lock"></i> Connexion admin</h2>
             <form id="loginForm">
                 <input type="email" id="loginEmail" placeholder="Email" autocomplete="email">
                 <input type="password" id="loginPass" placeholder="Mot de passe" autocomplete="current-password">
@@ -300,11 +401,11 @@
 
     <!-- Formulaire admin -->
     <section id="adminForm" class="hidden">
-        <h2 id="formTitle">➕ Ajouter une application</h2>
+        <h2 id="formTitle"><i data-lucide="plus"></i> Ajouter une application</h2>
         <form id="appForm">
             <input id="fTitre" type="text" placeholder="Titre *" required>
             <input id="fUrl" type="url" placeholder="URL (https://…) *" required>
-            <input id="fIcon" type="text" placeholder="Icône (emoji, ex : 🚀)">
+            <input id="fIcon" type="text" placeholder="Icône Lucide (ex : rocket)">
             <input id="fDesc" type="text" placeholder="Description (optionnel)">
             <div>
                 <input id="fImage" type="file" accept="image/*">
@@ -312,12 +413,12 @@
                     serveur.</p>
                 <div id="imgPreview" class="hidden">
                     <img id="imgPreviewImg" alt="Aperçu">
-                    <button type="button" id="removeImgBtn">🗑️ Retirer l'image</button>
+                    <button type="button" id="removeImgBtn"><i data-lucide="trash-2"></i> Retirer l'image</button>
                 </div>
             </div>
             <div class="form-actions">
-                <button type="submit" class="primary">💾 Enregistrer</button>
-                <button type="button" id="cancelBtn" class="hidden">✖ Annuler</button>
+                <button type="submit" class="primary"><i data-lucide="save"></i> Enregistrer</button>
+                <button type="button" id="cancelBtn" class="hidden"><i data-lucide="x"></i> Annuler</button>
             </div>
         </form>
     </section>
@@ -342,6 +443,10 @@
         let pendingImage = null;
         let removeImage = false;
 
+        function refreshIcons() {
+            if (window.lucide) lucide.createIcons();
+        }
+
         // ---------- Rendu ----------
         const grid = document.getElementById("grid");
         const search = document.getElementById("search");
@@ -362,16 +467,17 @@
             <div class="card">
               ${a.image_url
                     ? `<img class="screenshot" src="${a.image_url}" alt="${a.titre}" loading="lazy">`
-                    : `<span class="icon">${a.icon || "🔗"}</span>`}
+                    : `<i class="icon" data-lucide="${a.icon || "link"}"></i>`}
               <h2>${a.titre}</h2>
               ${a.description ? `<p>${a.description}</p>` : ""}
-              <a class="open-link" href="${a.url}" target="_blank" rel="noopener">Ouvrir ↗</a>
+              <a class="open-link" href="${a.url}" target="_blank" rel="noopener">Ouvrir <i data-lucide="arrow-up-right" style="width:14px;height:14px"></i></a>
               ${adminMode ? `
                 <div class="admin-actions">
-                  <button class="edit" data-action="edit" data-id="${a.id}">✏️ Modifier</button>
-                  <button class="delete" data-action="delete" data-id="${a.id}">🗑️ Supprimer</button>
+                  <button class="edit" data-action="edit" data-id="${a.id}"><i data-lucide="pencil"></i> Modifier</button>
+                  <button class="delete" data-action="delete" data-id="${a.id}"><i data-lucide="trash-2"></i> Supprimer</button>
                 </div>` : ""}
             </div>`).join("");
+            refreshIcons();
         }
 
         // ---------- Chargement des données depuis Supabase ----------
@@ -395,19 +501,21 @@
 
         function enterAdmin() {
             adminMode = true;
-            document.getElementById("adminBtn").textContent = "🔒 Se déconnecter";
+            document.getElementById("adminBtn").innerHTML = '<i data-lucide="lock"></i> Se déconnecter';
             document.getElementById("adminForm").classList.remove("hidden");
             loginModal.classList.add("hidden");
             loginError.classList.add("hidden");
             render();
+            refreshIcons();
         }
 
         function exitAdmin() {
             adminMode = false;
-            document.getElementById("adminBtn").textContent = "🛠️ Mode admin";
+            document.getElementById("adminBtn").innerHTML = '<i data-lucide="settings"></i> Mode admin';
             document.getElementById("adminForm").classList.add("hidden");
             resetForm();
             render();
+            refreshIcons();
         }
 
         document.getElementById("adminBtn").addEventListener("click", () => {
@@ -522,9 +630,10 @@
             pendingImage = null;
             removeImage = false;
             document.getElementById("appForm").reset();
-            document.getElementById("formTitle").textContent = "➕ Ajouter une application";
+            document.getElementById("formTitle").innerHTML = '<i data-lucide="plus"></i> Ajouter une application';
             document.getElementById("cancelBtn").classList.add("hidden");
             hidePreview();
+            refreshIcons();
         }
 
         document.getElementById("cancelBtn").addEventListener("click", resetForm);
@@ -604,10 +713,11 @@
                 document.getElementById("fUrl").value = app.url;
                 document.getElementById("fIcon").value = app.icon || "";
                 document.getElementById("fDesc").value = app.description || "";
-                document.getElementById("formTitle").textContent = "✏️ Modifier : " + app.titre;
+                document.getElementById("formTitle").innerHTML = '<i data-lucide="pencil"></i> Modifier : ' + app.titre;
                 document.getElementById("cancelBtn").classList.remove("hidden");
                 if (app.image_url) showPreview(app.image_url);
                 document.getElementById("adminForm").scrollIntoView({ behavior: "smooth" });
+                refreshIcons();
             }
 
             if (btn.dataset.action === "delete") {
@@ -629,6 +739,7 @@
 
         search.addEventListener("input", render);
         loadApps();
+        refreshIcons();
     </script>
 </body>
 
