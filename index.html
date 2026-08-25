@@ -154,6 +154,11 @@
             font-size: 1.2rem;
         }
 
+        #loginModal form {
+            display: grid;
+            gap: .8rem;
+        }
+
         #loginModal input {
             padding: .7rem;
             border-radius: 8px;
@@ -281,12 +286,14 @@
     <div id="loginModal" class="hidden">
         <div class="box">
             <h2>🔒 Connexion admin</h2>
-            <input type="email" id="loginEmail" placeholder="Email" autocomplete="email">
-            <input type="password" id="loginPass" placeholder="Mot de passe" autocomplete="current-password">
-            <div class="form-actions">
-                <button id="loginOk" class="primary">Se connecter</button>
-                <button id="loginCancel">Annuler</button>
-            </div>
+            <form id="loginForm">
+                <input type="email" id="loginEmail" placeholder="Email" autocomplete="email">
+                <input type="password" id="loginPass" placeholder="Mot de passe" autocomplete="current-password">
+                <div class="form-actions">
+                    <button type="submit" class="primary">Se connecter</button>
+                    <button type="button" id="loginCancel">Annuler</button>
+                </div>
+            </form>
             <p id="loginError" class="hidden">Email ou mot de passe incorrect.</p>
         </div>
     </div>
@@ -324,7 +331,10 @@
         // ⬇️ TES CLÉS SUPABASE (Project Settings → API)
         const SUPABASE_URL = "https://ggvjivxegniouanemgfg.supabase.co";    // ex: https://xxxx.supabase.co
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdndmppdnhlZ25pb3VhbmVtZ2ZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc0OTg4MjIsImV4cCI6MjEwMzA3NDgyMn0.dlOrUBYxYspPp_Aw149cjkWRAbEInoqvmnIz6ZmJWjg";  // clé "anon public"
-        const supabase = supabasejs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+
+        // ⚠️ Attention : "supabase" est déjà utilisé par le CDN → on nomme le client "supabaseClient"
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let apps = [];
         let adminMode = false;
@@ -366,7 +376,7 @@
 
         // ---------- Chargement des données depuis Supabase ----------
         async function loadApps() {
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from("apps")
                 .select("*")
                 .order("created_at", { ascending: true });
@@ -402,7 +412,7 @@
 
         document.getElementById("adminBtn").addEventListener("click", () => {
             if (adminMode) {
-                supabase.auth.signOut();
+                supabaseClient.auth.signOut();
             } else {
                 loginModal.classList.remove("hidden");
                 document.getElementById("loginPass").value = "";
@@ -414,7 +424,7 @@
         async function tryLogin() {
             const email = document.getElementById("loginEmail").value.trim();
             const password = document.getElementById("loginPass").value;
-            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
             if (error) {
                 loginError.classList.remove("hidden");
                 document.getElementById("loginPass").value = "";
@@ -424,15 +434,15 @@
             }
         }
 
-        document.getElementById("loginOk").addEventListener("click", tryLogin);
-        document.getElementById("loginCancel").addEventListener("click", () => loginModal.classList.add("hidden"));
-        document.getElementById("loginPass").addEventListener("keydown", e => {
-            if (e.key === "Enter") tryLogin();
+        document.getElementById("loginForm").addEventListener("submit", e => {
+            e.preventDefault();
+            tryLogin();
         });
+        document.getElementById("loginCancel").addEventListener("click", () => loginModal.classList.add("hidden"));
 
         // Session restaurée automatiquement
-        supabase.auth.getSession().then(({ data }) => { if (data.session) enterAdmin(); });
-        supabase.auth.onAuthStateChange(event => {
+        supabaseClient.auth.getSession().then(({ data }) => { if (data.session) enterAdmin(); });
+        supabaseClient.auth.onAuthStateChange(event => {
             if (event === "SIGNED_IN") enterAdmin();
             if (event === "SIGNED_OUT") exitAdmin();
         });
@@ -480,11 +490,11 @@
 
         async function uploadScreenshot(dataUrl) {
             const fileName = (crypto.randomUUID ? crypto.randomUUID() : Date.now()) + ".jpg";
-            const { error } = await supabase.storage
+            const { error } = await supabaseClient.storage
                 .from("screenshots")
                 .upload("public/" + fileName, dataUrlToBlob(dataUrl), { contentType: "image/jpeg" });
             if (error) throw error;
-            return supabase.storage.from("screenshots").getPublicUrl("public/" + fileName).data.publicUrl;
+            return supabaseClient.storage.from("screenshots").getPublicUrl("public/" + fileName).data.publicUrl;
         }
 
         async function deleteScreenshot(imageUrl) {
@@ -493,7 +503,7 @@
             const i = imageUrl.indexOf(marker);
             if (i < 0) return;
             const path = imageUrl.slice(i + marker.length);
-            await supabase.storage.from("screenshots").remove([path]);
+            await supabaseClient.storage.from("screenshots").remove([path]);
         }
 
         // ---------- Aperçu image ----------
@@ -558,7 +568,7 @@
                 }
 
                 if (editingId) {
-                    const { data, error } = await supabase
+                    const { data, error } = await supabaseClient
                         .from("apps")
                         .update({ titre, url, icon, description, image_url: imageUrl })
                         .eq("id", editingId)
@@ -567,7 +577,7 @@
                     const idx = apps.findIndex(a => a.id === editingId);
                     if (idx >= 0) apps[idx] = data[0];
                 } else {
-                    const { data, error } = await supabase
+                    const { data, error } = await supabaseClient
                         .from("apps")
                         .insert([{ titre, url, icon, description, image_url: imageUrl }])
                         .select();
@@ -605,7 +615,7 @@
                 if (confirm(`Supprimer « ${app ? app.titre : ""} » ?`)) {
                     (async () => {
                         await deleteScreenshot(app.image_url);
-                        const { error } = await supabase.from("apps").delete().eq("id", id);
+                        const { error } = await supabaseClient.from("apps").delete().eq("id", id);
                         if (error) {
                             alert("Erreur : " + error.message);
                             return;
