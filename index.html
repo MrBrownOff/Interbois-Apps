@@ -30,6 +30,13 @@
             margin-bottom: 1.2rem;
         }
 
+        .header-actions {
+            display: flex;
+            gap: .6rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
         #search {
             width: 100%;
             max-width: 400px;
@@ -39,6 +46,62 @@
             background: #1e293b;
             color: #e2e8f0;
             font-size: 1rem;
+        }
+
+        button {
+            padding: .7rem 1.1rem;
+            border-radius: 10px;
+            border: none;
+            font-size: .95rem;
+            cursor: pointer;
+            background: #334155;
+            color: #e2e8f0;
+        }
+
+        button:hover {
+            filter: brightness(1.2);
+        }
+
+        button.primary {
+            background: #0ea5e9;
+            color: #fff;
+        }
+
+        #adminForm {
+            max-width: 900px;
+            margin: 0 auto 1.5rem;
+            background: #1e293b;
+            border: 1px solid #0ea5e9;
+            border-radius: 14px;
+            padding: 1.2rem;
+        }
+
+        #adminForm h2 {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        #adminForm form {
+            display: grid;
+            gap: .6rem;
+        }
+
+        #adminForm input {
+            padding: .7rem;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: #e2e8f0;
+            font-size: 1rem;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: .6rem;
+        }
+
+        #cancelBtn {
+            background: #ef4444;
         }
 
         #grid {
@@ -54,12 +117,10 @@
             border: 1px solid #334155;
             border-radius: 14px;
             padding: 1.2rem;
-            text-decoration: none;
-            color: inherit;
-            transition: transform .15s, border-color .15s;
             display: flex;
             flex-direction: column;
             gap: .5rem;
+            transition: transform .15s, border-color .15s;
         }
 
         .card:hover {
@@ -79,6 +140,40 @@
             color: #94a3b8;
             font-size: .9rem;
             line-height: 1.4;
+            flex: 1;
+        }
+
+        .card .open-link {
+            text-decoration: none;
+            color: #38bdf8;
+            font-size: .9rem;
+            font-weight: 600;
+        }
+
+        .card .open-link:hover {
+            text-decoration: underline;
+        }
+
+        .card .admin-actions {
+            display: flex;
+            gap: .5rem;
+            margin-top: .6rem;
+            padding-top: .6rem;
+            border-top: 1px solid #334155;
+        }
+
+        .card .admin-actions button {
+            padding: .4rem .8rem;
+            font-size: .85rem;
+        }
+
+        .card .admin-actions .edit {
+            background: #f59e0b;
+            color: #0f172a;
+        }
+
+        .card .admin-actions .delete {
+            background: #ef4444;
         }
 
         .empty {
@@ -87,43 +182,174 @@
             grid-column: 1 / -1;
             padding: 2rem;
         }
+
+        .hint {
+            color: #64748b;
+            font-size: .85rem;
+            margin-top: .8rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
 
 <body>
     <header>
         <h1>Applications Interbois</h1>
-        <input id="search" type="search" placeholder="Rechercher une application…">
+        <div class="header-actions">
+            <input id="search" type="search" placeholder="Rechercher une application…">
+            <button id="adminBtn">🛠️ Mode admin</button>
+        </div>
     </header>
+
+    <!-- Formulaire admin (caché par défaut) -->
+    <section id="adminForm" class="hidden">
+        <h2 id="formTitle">➕ Ajouter une application</h2>
+        <form id="appForm">
+            <input id="fTitre" placeholder="Titre *" required>
+            <input id="fUrl" type="url" placeholder="URL (https://…) *" required>
+            <input id="fIcon" placeholder="Icône (emoji, ex : 🚀)">
+            <input id="fDesc" placeholder="Description (optionnel)">
+            <div class="form-actions">
+                <button type="submit" class="primary">💾 Enregistrer</button>
+                <button type="button" id="cancelBtn" class="hidden">✖ Annuler</button>
+            </div>
+        </form>
+        <p class="hint">Les modifications sont enregistrées dans ce navigateur (localStorage).</p>
+    </section>
+
     <main id="grid"></main>
 
     <script>
-        // ⬇️ MODIFIE ICI : ajoute, retire ou modifie les lignes ci-dessous
-        const apps = [
-            { titre: "Application calcul des frais de livraison", url: "https://huggingface.co/spaces/Interbois95/zones-livraison", description: "", icon: "" },
-            { titre: "Commande d'Etiquettes", url: "https://mrbrownoff.github.io/Commande-Etiquettes/", description: "", icon: "" },
+        // Valeurs affichées la première fois (avant toute modification)
+        const DEFAULT_APPS = [
+            { id: "1", titre: "Application calcul des frais de livraison", url: "https://huggingface.co/spaces/Interbois95/zones-livraison", description: "", icon: "" },
+            { id: "2", titre: "Commande d'Etiquettes", url: "https://mrbrownoff.github.io/Commande-Etiquettes/", description: "", icon: "" },
         ];
 
-        // ⬇️ Ne rien modifier sous cette ligne
+        const STORAGE_KEY = "portalApps";
+        let apps = loadApps();
+        let adminMode = false;
+        let editingId = null;
+
+        // ---------- Persistance ----------
+        function loadApps() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) return JSON.parse(raw);
+            } catch (e) { /* ignore */ }
+            return [...DEFAULT_APPS];
+        }
+
+        function saveApps() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(apps));
+        }
+
+        // ---------- Rendu ----------
         const grid = document.getElementById("grid");
         const search = document.getElementById("search");
 
-        function render(filtre = "") {
-            const q = filtre.toLowerCase();
+        function render() {
+            const q = search.value.toLowerCase();
             const matches = apps.filter(a =>
-                a.titre.toLowerCase().includes(q) || (a.description || "").toLowerCase().includes(q)
+                a.titre.toLowerCase().includes(q) ||
+                (a.description || "").toLowerCase().includes(q)
             );
-            grid.innerHTML = matches.length
-                ? matches.map(a => `
-            <a class="card" href="${a.url}" target="_blank" rel="noopener">
+
+            if (!matches.length) {
+                grid.innerHTML = `<p class="empty">Aucune application trouvée.</p>`;
+                return;
+            }
+
+            grid.innerHTML = matches.map(a => `
+            <div class="card">
               <span class="icon">${a.icon || "🔗"}</span>
               <h2>${a.titre}</h2>
-              <p>${a.description || ""}</p>
-            </a>`).join("")
-                : `<p class="empty">Aucune application trouvée.</p>`;
+              ${a.description ? `<p>${a.description}</p>` : ""}
+              <a class="open-link" href="${a.url}" target="_blank" rel="noopener">Ouvrir ↗</a>
+              ${adminMode ? `
+                <div class="admin-actions">
+                  <button class="edit" data-action="edit" data-id="${a.id}">✏️ Modifier</button>
+                  <button class="delete" data-action="delete" data-id="${a.id}">🗑️ Supprimer</button>
+                </div>` : ""}
+            </div>`).join("");
         }
 
-        search.addEventListener("input", e => render(e.target.value));
+        // ---------- Mode admin ----------
+        document.getElementById("adminBtn").addEventListener("click", () => {
+            adminMode = !adminMode;
+            document.getElementById("adminBtn").textContent = adminMode ? "🔒 Quitter admin" : "🛠️ Mode admin";
+            if (adminMode) {
+                document.getElementById("adminForm").classList.remove("hidden");
+            } else {
+                document.getElementById("adminForm").classList.add("hidden");
+                resetForm();
+            }
+            render();
+        });
+
+        function resetForm() {
+            editingId = null;
+            document.getElementById("appForm").reset();
+            document.getElementById("formTitle").textContent = "➕ Ajouter une application";
+            document.getElementById("cancelBtn").classList.add("hidden");
+        }
+
+        document.getElementById("cancelBtn").addEventListener("click", resetForm);
+
+        // Ajout / modification
+        document.getElementById("appForm").addEventListener("submit", e => {
+            e.preventDefault();
+            const titre = document.getElementById("fTitre").value.trim();
+            const url = document.getElementById("fUrl").value.trim();
+            const icon = document.getElementById("fIcon").value.trim();
+            const description = document.getElementById("fDesc").value.trim();
+
+            if (editingId) {
+                const app = apps.find(a => a.id === editingId);
+                Object.assign(app, { titre, url, icon, description });
+            } else {
+                apps.push({
+                    id: (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString()),
+                    titre, url, icon, description
+                });
+            }
+            saveApps();
+            resetForm();
+            render();
+        });
+
+        // Modifier / Supprimer (délégation d'événements)
+        grid.addEventListener("click", e => {
+            const btn = e.target.closest("button[data-action]");
+            if (!btn) return;
+            const id = btn.dataset.id;
+
+            if (btn.dataset.action === "edit") {
+                const app = apps.find(a => a.id === id);
+                editingId = id;
+                document.getElementById("fTitre").value = app.titre;
+                document.getElementById("fUrl").value = app.url;
+                document.getElementById("fIcon").value = app.icon || "";
+                document.getElementById("fDesc").value = app.description || "";
+                document.getElementById("formTitle").textContent = "✏️ Modifier : " + app.titre;
+                document.getElementById("cancelBtn").classList.remove("hidden");
+                document.getElementById("adminForm").scrollIntoView({ behavior: "smooth" });
+            }
+
+            if (btn.dataset.action === "delete") {
+                const app = apps.find(a => a.id === id);
+                if (confirm(`Supprimer « ${app ? app.titre : ""} » ?`)) {
+                    apps = apps.filter(a => a.id !== id);
+                    saveApps();
+                    render();
+                }
+            }
+        });
+
+        search.addEventListener("input", render);
         render();
     </script>
 </body>
