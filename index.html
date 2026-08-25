@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mes applications</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+        }
+
+        body {
+            font-family: system-ui, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        header {
+            max-width: 900px;
+            margin: 0 auto 2rem;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 1.2rem;
+        }
+
+        #search {
+            width: 100%;
+            max-width: 400px;
+            padding: .7rem 1rem;
+            border-radius: 10px;
+            border: 1px solid #334155;
+            background: #1e293b;
+            color: #e2e8f0;
+            font-size: 1rem;
+        }
+
+        #grid {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 14px;
+            padding: 1.2rem;
+            text-decoration: none;
+            color: inherit;
+            transition: transform .15s, border-color .15s;
+            display: flex;
+            flex-direction: column;
+            gap: .5rem;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            border-color: #38bdf8;
+        }
+
+        .card .icon {
+            font-size: 2rem;
+        }
+
+        .card h2 {
+            font-size: 1.1rem;
+        }
+
+        .card p {
+            color: #94a3b8;
+            font-size: .9rem;
+            line-height: 1.4;
+        }
+
+        .empty {
+            color: #64748b;
+            text-align: center;
+            grid-column: 1 / -1;
+            padding: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>🚀 Mes applications</h1>
+        <input id="search" type="search" placeholder="Rechercher une application…">
+    </header>
+    <main id="grid"></main>
+
+    <script>
+        // ⬇️ MODIFIE ICI : ajoute, retire ou modifie les lignes ci-dessous
+        const apps = [
+            { titre: "Application calcul des frais de livraison", url: "https://huggingface.co/spaces/Interbois95/zones-livraison", description: "Mes articles et réflexions.", icon: "✍️" },
+            { titre: "Commande d'Etiquettes", url: "https://mrbrownoff.github.io/Commande-Etiquettes/", description: "Statistiques et métriques en temps réel.", icon: "📊" },
+        ];
+
+        // ⬇️ Ne rien modifier sous cette ligne
+        const grid = document.getElementById("grid");
+        const search = document.getElementById("search");
+
+        function render(filtre = "") {
+            const q = filtre.toLowerCase();
+            const matches = apps.filter(a =>
+                a.titre.toLowerCase().includes(q) || (a.description || "").toLowerCase().includes(q)
+            );
+            grid.innerHTML = matches.length
+                ? matches.map(a => `
+            <a class="card" href="${a.url}" target="_blank" rel="noopener">
+              <span class="icon">${a.icon || "🔗"}</span>
+              <h2>${a.titre}</h2>
+              <p>${a.description || ""}</p>
+            </a>`).join("")
+                : `<p class="empty">Aucune application trouvée.</p>`;
+        }
+
+        search.addEventListener("input", e => render(e.target.value));
+        render();
+    </script>
+</body>
+
+</html>
