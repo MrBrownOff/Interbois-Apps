@@ -86,13 +86,19 @@
             gap: .6rem;
         }
 
-        #adminForm input {
+        #adminForm input[type="text"],
+        #adminForm input[type="url"] {
             padding: .7rem;
             border-radius: 8px;
             border: 1px solid #334155;
             background: #0f172a;
             color: #e2e8f0;
             font-size: 1rem;
+        }
+
+        #adminForm input[type="file"] {
+            color: #94a3b8;
+            font-size: .9rem;
         }
 
         .form-actions {
@@ -102,6 +108,64 @@
 
         #cancelBtn {
             background: #ef4444;
+        }
+
+        #imgPreview {
+            display: flex;
+            gap: .8rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        #imgPreview img {
+            width: 345px;
+            height: 230px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #334155;
+        }
+
+        #removeImgBtn {
+            background: #ef4444;
+        }
+
+        /* Fenêtre de connexion */
+        #loginModal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        #loginModal .box {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 14px;
+            padding: 1.5rem;
+            width: min(90vw, 360px);
+            display: grid;
+            gap: .8rem;
+        }
+
+        #loginModal h2 {
+            font-size: 1.2rem;
+        }
+
+        #loginModal input {
+            padding: .7rem;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: #e2e8f0;
+            font-size: 1rem;
+        }
+
+        #loginError {
+            color: #ef4444;
+            font-size: .85rem;
         }
 
         #grid {
@@ -126,6 +190,15 @@
         .card:hover {
             transform: translateY(-3px);
             border-color: #38bdf8;
+        }
+
+        .card .screenshot {
+            width: 100%;
+            max-width: 345px;
+            height: 230px;
+            object-fit: cover;
+            border-radius: 8px;
+            background: #0f172a;
         }
 
         .card .icon {
@@ -204,48 +277,60 @@
         </div>
     </header>
 
-    <!-- Formulaire admin (caché par défaut) -->
+    <!-- Fenêtre de connexion -->
+    <div id="loginModal" class="hidden">
+        <div class="box">
+            <h2>🔒 Connexion admin</h2>
+            <input type="email" id="loginEmail" placeholder="Email" autocomplete="email">
+            <input type="password" id="loginPass" placeholder="Mot de passe" autocomplete="current-password">
+            <div class="form-actions">
+                <button id="loginOk" class="primary">Se connecter</button>
+                <button id="loginCancel">Annuler</button>
+            </div>
+            <p id="loginError" class="hidden">Email ou mot de passe incorrect.</p>
+        </div>
+    </div>
+
+    <!-- Formulaire admin -->
     <section id="adminForm" class="hidden">
         <h2 id="formTitle">➕ Ajouter une application</h2>
         <form id="appForm">
-            <input id="fTitre" placeholder="Titre *" required>
+            <input id="fTitre" type="text" placeholder="Titre *" required>
             <input id="fUrl" type="url" placeholder="URL (https://…) *" required>
-            <input id="fIcon" placeholder="Icône (emoji, ex : 🚀)">
-            <input id="fDesc" placeholder="Description (optionnel)">
+            <input id="fIcon" type="text" placeholder="Icône (emoji, ex : 🚀)">
+            <input id="fDesc" type="text" placeholder="Description (optionnel)">
+            <div>
+                <input id="fImage" type="file" accept="image/*">
+                <p class="hint">Capture d'écran : redimensionnée automatiquement en 345 × 230 px puis envoyée sur le
+                    serveur.</p>
+                <div id="imgPreview" class="hidden">
+                    <img id="imgPreviewImg" alt="Aperçu">
+                    <button type="button" id="removeImgBtn">🗑️ Retirer l'image</button>
+                </div>
+            </div>
             <div class="form-actions">
                 <button type="submit" class="primary">💾 Enregistrer</button>
                 <button type="button" id="cancelBtn" class="hidden">✖ Annuler</button>
             </div>
         </form>
-        <p class="hint">Les modifications sont enregistrées dans ce navigateur (localStorage).</p>
     </section>
 
-    <main id="grid"></main>
+    <main id="grid">
+        <p class="empty">Chargement…</p>
+    </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // Valeurs affichées la première fois (avant toute modification)
-        const DEFAULT_APPS = [
-            { id: "1", titre: "Application calcul des frais de livraison", url: "https://huggingface.co/spaces/Interbois95/zones-livraison", description: "", icon: "" },
-            { id: "2", titre: "Commande d'Etiquettes", url: "https://mrbrownoff.github.io/Commande-Etiquettes/", description: "", icon: "" },
-        ];
+        // ⬇️ TES CLÉS SUPABASE (Project Settings → API)
+        const SUPABASE_URL = "https://ggvjivxegniouanemgfg.supabase.co";    // ex: https://xxxx.supabase.co
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdndmppdnhlZ25pb3VhbmVtZ2ZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc0OTg4MjIsImV4cCI6MjEwMzA3NDgyMn0.dlOrUBYxYspPp_Aw149cjkWRAbEInoqvmnIz6ZmJWjg";  // clé "anon public"
+        const supabase = supabasejs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        const STORAGE_KEY = "portalApps";
-        let apps = loadApps();
+        let apps = [];
         let adminMode = false;
         let editingId = null;
-
-        // ---------- Persistance ----------
-        function loadApps() {
-            try {
-                const raw = localStorage.getItem(STORAGE_KEY);
-                if (raw) return JSON.parse(raw);
-            } catch (e) { /* ignore */ }
-            return [...DEFAULT_APPS];
-        }
-
-        function saveApps() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(apps));
-        }
+        let pendingImage = null;
+        let removeImage = false;
 
         // ---------- Rendu ----------
         const grid = document.getElementById("grid");
@@ -265,7 +350,9 @@
 
             grid.innerHTML = matches.map(a => `
             <div class="card">
-              <span class="icon">${a.icon || "🔗"}</span>
+              ${a.image_url
+                    ? `<img class="screenshot" src="${a.image_url}" alt="${a.titre}" loading="lazy">`
+                    : `<span class="icon">${a.icon || "🔗"}</span>`}
               <h2>${a.titre}</h2>
               ${a.description ? `<p>${a.description}</p>` : ""}
               <a class="open-link" href="${a.url}" target="_blank" rel="noopener">Ouvrir ↗</a>
@@ -277,51 +364,224 @@
             </div>`).join("");
         }
 
-        // ---------- Mode admin ----------
-        document.getElementById("adminBtn").addEventListener("click", () => {
-            adminMode = !adminMode;
-            document.getElementById("adminBtn").textContent = adminMode ? "🔒 Quitter admin" : "🛠️ Mode admin";
-            if (adminMode) {
-                document.getElementById("adminForm").classList.remove("hidden");
-            } else {
-                document.getElementById("adminForm").classList.add("hidden");
-                resetForm();
+        // ---------- Chargement des données depuis Supabase ----------
+        async function loadApps() {
+            const { data, error } = await supabase
+                .from("apps")
+                .select("*")
+                .order("created_at", { ascending: true });
+            if (error) {
+                console.error(error);
+                grid.innerHTML = `<p class="empty">Erreur de chargement des données.</p>`;
+                return;
             }
+            apps = data || [];
             render();
+        }
+
+        // ---------- Connexion / déconnexion ----------
+        const loginModal = document.getElementById("loginModal");
+        const loginError = document.getElementById("loginError");
+
+        function enterAdmin() {
+            adminMode = true;
+            document.getElementById("adminBtn").textContent = "🔒 Se déconnecter";
+            document.getElementById("adminForm").classList.remove("hidden");
+            loginModal.classList.add("hidden");
+            loginError.classList.add("hidden");
+            render();
+        }
+
+        function exitAdmin() {
+            adminMode = false;
+            document.getElementById("adminBtn").textContent = "🛠️ Mode admin";
+            document.getElementById("adminForm").classList.add("hidden");
+            resetForm();
+            render();
+        }
+
+        document.getElementById("adminBtn").addEventListener("click", () => {
+            if (adminMode) {
+                supabase.auth.signOut();
+            } else {
+                loginModal.classList.remove("hidden");
+                document.getElementById("loginPass").value = "";
+                loginError.classList.add("hidden");
+                document.getElementById("loginEmail").focus();
+            }
         });
+
+        async function tryLogin() {
+            const email = document.getElementById("loginEmail").value.trim();
+            const password = document.getElementById("loginPass").value;
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            if (error) {
+                loginError.classList.remove("hidden");
+                document.getElementById("loginPass").value = "";
+                document.getElementById("loginPass").focus();
+            } else {
+                loginModal.classList.add("hidden");
+            }
+        }
+
+        document.getElementById("loginOk").addEventListener("click", tryLogin);
+        document.getElementById("loginCancel").addEventListener("click", () => loginModal.classList.add("hidden"));
+        document.getElementById("loginPass").addEventListener("keydown", e => {
+            if (e.key === "Enter") tryLogin();
+        });
+
+        // Session restaurée automatiquement
+        supabase.auth.getSession().then(({ data }) => { if (data.session) enterAdmin(); });
+        supabase.auth.onAuthStateChange(event => {
+            if (event === "SIGNED_IN") enterAdmin();
+            if (event === "SIGNED_OUT") exitAdmin();
+        });
+
+        // ---------- Redimensionnement image (345 × 230, recadrage cover) ----------
+        function resizeImage(file, maxW = 345, maxH = 230, quality = 0.85) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement("canvas");
+                        canvas.width = maxW;
+                        canvas.height = maxH;
+                        const ctx = canvas.getContext("2d");
+                        const targetRatio = maxW / maxH;
+                        const srcRatio = img.width / img.height;
+                        let sx = 0, sy = 0, sw = img.width, sh = img.height;
+                        if (srcRatio > targetRatio) {
+                            sw = img.height * targetRatio;
+                            sx = (img.width - sw) / 2;
+                        } else {
+                            sh = img.width / targetRatio;
+                            sy = (img.height - sh) / 2;
+                        }
+                        ctx.drawImage(img, sx, sy, sw, sh, 0, 0, maxW, maxH);
+                        resolve(canvas.toDataURL("image/jpeg", quality));
+                    };
+                    img.onerror = reject;
+                    img.src = reader.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function dataUrlToBlob(dataUrl) {
+            const parts = dataUrl.split(",");
+            const mime = parts[0].match(/:(.*?);/)[1];
+            const bin = atob(parts[1]);
+            const arr = new Uint8Array(bin.length);
+            for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+            return new Blob([arr], { type: mime });
+        }
+
+        async function uploadScreenshot(dataUrl) {
+            const fileName = (crypto.randomUUID ? crypto.randomUUID() : Date.now()) + ".jpg";
+            const { error } = await supabase.storage
+                .from("screenshots")
+                .upload("public/" + fileName, dataUrlToBlob(dataUrl), { contentType: "image/jpeg" });
+            if (error) throw error;
+            return supabase.storage.from("screenshots").getPublicUrl("public/" + fileName).data.publicUrl;
+        }
+
+        async function deleteScreenshot(imageUrl) {
+            if (!imageUrl) return;
+            const marker = "/screenshots/";
+            const i = imageUrl.indexOf(marker);
+            if (i < 0) return;
+            const path = imageUrl.slice(i + marker.length);
+            await supabase.storage.from("screenshots").remove([path]);
+        }
+
+        // ---------- Aperçu image ----------
+        function showPreview(src) {
+            document.getElementById("imgPreview").classList.remove("hidden");
+            document.getElementById("imgPreviewImg").src = src;
+        }
+
+        function hidePreview() {
+            document.getElementById("imgPreview").classList.add("hidden");
+            document.getElementById("imgPreviewImg").src = "";
+        }
 
         function resetForm() {
             editingId = null;
+            pendingImage = null;
+            removeImage = false;
             document.getElementById("appForm").reset();
             document.getElementById("formTitle").textContent = "➕ Ajouter une application";
             document.getElementById("cancelBtn").classList.add("hidden");
+            hidePreview();
         }
 
         document.getElementById("cancelBtn").addEventListener("click", resetForm);
 
-        // Ajout / modification
-        document.getElementById("appForm").addEventListener("submit", e => {
+        document.getElementById("fImage").addEventListener("change", async e => {
+            const file = e.target.files[0];
+            if (!file) return;
+            try {
+                pendingImage = await resizeImage(file);
+                removeImage = false;
+                showPreview(pendingImage);
+            } catch (err) {
+                alert("Impossible de lire cette image.");
+            }
+        });
+
+        document.getElementById("removeImgBtn").addEventListener("click", () => {
+            pendingImage = null;
+            removeImage = true;
+            document.getElementById("fImage").value = "";
+            hidePreview();
+        });
+
+        // ---------- Ajout / modification ----------
+        document.getElementById("appForm").addEventListener("submit", async e => {
             e.preventDefault();
             const titre = document.getElementById("fTitre").value.trim();
             const url = document.getElementById("fUrl").value.trim();
             const icon = document.getElementById("fIcon").value.trim();
             const description = document.getElementById("fDesc").value.trim();
 
-            if (editingId) {
-                const app = apps.find(a => a.id === editingId);
-                Object.assign(app, { titre, url, icon, description });
-            } else {
-                apps.push({
-                    id: (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString()),
-                    titre, url, icon, description
-                });
+            try {
+                let imageUrl = "";
+                if (editingId) {
+                    const app = apps.find(a => a.id === editingId);
+                    imageUrl = removeImage ? "" : (app.image_url || "");
+                }
+                if (pendingImage) {
+                    if (editingId && imageUrl) await deleteScreenshot(imageUrl);
+                    imageUrl = await uploadScreenshot(pendingImage);
+                }
+
+                if (editingId) {
+                    const { data, error } = await supabase
+                        .from("apps")
+                        .update({ titre, url, icon, description, image_url: imageUrl })
+                        .eq("id", editingId)
+                        .select();
+                    if (error) throw error;
+                    const idx = apps.findIndex(a => a.id === editingId);
+                    if (idx >= 0) apps[idx] = data[0];
+                } else {
+                    const { data, error } = await supabase
+                        .from("apps")
+                        .insert([{ titre, url, icon, description, image_url: imageUrl }])
+                        .select();
+                    if (error) throw error;
+                    apps.push(data[0]);
+                }
+                resetForm();
+                render();
+            } catch (err) {
+                alert("Erreur : " + err.message);
             }
-            saveApps();
-            resetForm();
-            render();
         });
 
-        // Modifier / Supprimer (délégation d'événements)
+        // ---------- Modifier / Supprimer ----------
         grid.addEventListener("click", e => {
             const btn = e.target.closest("button[data-action]");
             if (!btn) return;
@@ -336,21 +596,29 @@
                 document.getElementById("fDesc").value = app.description || "";
                 document.getElementById("formTitle").textContent = "✏️ Modifier : " + app.titre;
                 document.getElementById("cancelBtn").classList.remove("hidden");
+                if (app.image_url) showPreview(app.image_url);
                 document.getElementById("adminForm").scrollIntoView({ behavior: "smooth" });
             }
 
             if (btn.dataset.action === "delete") {
                 const app = apps.find(a => a.id === id);
                 if (confirm(`Supprimer « ${app ? app.titre : ""} » ?`)) {
-                    apps = apps.filter(a => a.id !== id);
-                    saveApps();
-                    render();
+                    (async () => {
+                        await deleteScreenshot(app.image_url);
+                        const { error } = await supabase.from("apps").delete().eq("id", id);
+                        if (error) {
+                            alert("Erreur : " + error.message);
+                            return;
+                        }
+                        apps = apps.filter(a => a.id !== id);
+                        render();
+                    })();
                 }
             }
         });
 
         search.addEventListener("input", render);
-        render();
+        loadApps();
     </script>
 </body>
 
